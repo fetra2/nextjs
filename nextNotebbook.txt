@@ -1,0 +1,455 @@
+Chap 1
+npx create-next-app@latest nextjs-dashboard --use-npm --example "https://github.com/vercel/next-learn/tree/main/dashboard/starter-example"
+cd nextjs-dashboard
+https://mockapi.io/projects
+npm i
+npm run dev 
+
+Chap 2 CSS
+- In Tailwind, you style elements by adding class names. For example, adding the class "text-blue-500" will turn the <h1> text blue:
+<h1 className="text-blue-500">I'm blue!</h1>
+- CSS Modules allow you to scope CSS to a component by automatically creating unique class names, so you don't have to worry about style collisions as well.
+    /app/ui/home.module.css
+    .shape {
+        height: 0;
+        width: 0;
+        border-bottom: 30px solid black;
+        border-left: 20px solid transparent;
+        border-right: 20px solid transparent;
+    }
+
+    In /app/page.tsx
+    import styles from '@/app/ui/home.module.css';
+    <div className={styles.shape} />
+
+- clsx library to toggle class names:
+    Suppose that you want to create an InvoiceStatus component which accepts status. The status can be 'pending' or 'paid'.
+    If it's 'paid', you want the color to be green. If it's 'pending', you want the color to be gray.
+    see /app/ui/invoices/status.tsx
+
+Chap 3 Fonts ands Images
+- next/font
+Next.js automatically optimizes fonts in the application when you use the next/font module. It downloads font files at build time and hosts them with your other static assets. This means when a user visits your application, there are no additional network requests for fonts which would impact performance.
+    see create /app/ui/fonts.ts
+        import { Inter } from 'next/font/google';
+        export const inter = Inter({ subsets: ['latin'] });
+    Finally, add the font to the <body> element in /app/layout.tsx:
+        import { inter } from '@/app/ui/fonts';
+        <body className={`${inter.className} antialiased`}>{children}</body>
+    By adding Inter to the <body> element, the font will be applied throughout your application
+
+Resume:
+/app/ui/fonts.ts:
+    import { Inter, Lusitana } from 'next/font/google';
+    
+    export const inter = Inter({ subsets: ['latin'] });
+    
+    export const lusitana = Lusitana({
+    weight: ['400', '700'],
+    subsets: ['latin'],
+    });
+/app/page.tsx:
+    import AcmeLogo from '@/app/ui/acme-logo';
+    import { ArrowRightIcon } from '@heroicons/react/24/outline';
+    import Link from 'next/link';
+    import { lusitana } from '@/app/ui/fonts';
+    
+    export default function Page() {
+        return (
+            // ...
+            <p
+            className={`${lusitana.className} text-xl text-gray-800 md:text-3xl md:leading-normal`}
+            >
+            <strong>Welcome to Acme.</strong> This is the example for the{' '}
+            <a href="https://nextjs.org/learn/" className="text-blue-500">
+                Next.js Learn Course
+            </a>
+            , brought to you by Vercel.
+            </p>
+            // ...
+        );
+    }
+
+- next/image 
+    Next.js can serve static assets, like images, under the top-level /public folder. Files inside /public can be referenced in your application.
+    <img
+        src="/hero.png"
+        alt="Screenshots of the dashboard project showing desktop version"
+    />
+    However, this means you have to manually:
+    Ensure your image is responsive on different screen sizes.
+    Specify image sizes for different devices.
+    Prevent layout shift as the images load.
+    Lazy load images that are outside the user's viewport.
+
+    Image Optimization is a large topic in web development that could be considered a specialization in itself. 
+    * Instead of manually implementing these optimizations, you can use the next/image component to automatically optimize your images.
+
+USE: import the component from next/image. Then, add the image
+    //...
+    import Image from 'next/image';
+    
+    export default function Page() {
+    return (
+        // ...
+        <div className="flex items-center justify-center p-6 md:w-3/5 md:px-28 md:py-12">
+            {/* Add Hero Images Here */}
+            <Image
+                src="/hero-desktop.png"
+                width={1000}
+                height={760}
+                className="hidden md:block"
+                alt="Screenshots of the dashboard project showing desktop version"
+            />
+            <Image
+                src="/hero-mobile.png"
+                width={560}
+                height={620}
+                className="block md:hidden"
+                alt="Screenshots of the dashboard project showing mobile version"
+            />
+        </div>
+        //...
+    );
+    }
+
+    You'll also notice the class hidden to remove the image from the DOM on mobile screens, and md:block to show the image on desktop screens.
+
+Chap 4: LAYOUTS AND PAGES
+     In your application, you already have a page file: /app/page.tsx - this is the home page associated with the route /.
+     To create a nested route, you can nest folders inside each other and add page.tsx files inside them. For example: /app/dashboard/page.tsx is associated with the /dashboard path.
+
+     /app/dashboard/page.tsx is associated with the /dashboard path.
+     By having a special name for page files, Next.js allows you to colocate UI components, test files, and other related code with your routes. Only the content inside the page file will be publicly accessible. For example, the /ui and /lib folders are colocated inside the /app folder along with your routes.
+
+     Dashboards have some sort of navigation that is shared across multiple pages. In Next.js, you can use a special layout.tsx file to create UI that is shared between multiple pages. Let's create a layout for the dashboard pages!
+    /app/dashboard/layout.tsx
+
+Chap 5: Navigation between pages
+    next/link
+    for partial refresh
+use: To use the <Link /> component, open /app/ui/dashboard/nav-links.tsx, and import the Link component from next/link. Then, replace the <a> tag with <Link>
+    before
+    <a
+        key={link.name}
+        href={link.href}
+        className="flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3"
+    >
+        <LinkIcon className="w-6" />
+        <p className="hidden md:block">{link.name}</p>
+    </a>
+    After
+    - import Link from 'next/link';
+    - <Link
+        key={link.name}
+        href={link.href}
+        className="flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3"
+    >
+        <LinkIcon className="w-6" />
+        <p className="hidden md:block">{link.name}</p>
+    </Link>
+
+    active link
+    Since usePathname() is a hook, you'll need to turn nav-links.tsx into a Client Component. 
+    - Add React's "use client" directive to the top of the file, then import usePathname() from next/navigation
+    
+    /app/ui/dashboard/nav-links.tsx:
+    'use client';
+    //..3
+    import { usePathname } from 'next/navigation';
+
+    - Next, assign the path to a variable called pathname inside your <NavLinks /> component:
+    export default function NavLinks() {
+        const pathname = usePathname();
+        //...
+    - You can use the clsx library introduced in the chapter on CSS styling to conditionally apply class names when the link is active. When link.href matches the pathname, the link should be displayed with blue text and a light blue background:
+        import clsx from 'clsx';
+        //...
+        className={clsx(
+            'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3',
+            {
+            'bg-sky-100 text-blue-600': pathname === link.href,
+            },
+        )}
+
+Chap 6: Setting Up Your Database
+    setting up a PostgreSQL database using @vercel/postgres:
+    - push to github.com, versel.com for deployment
+    connect and deploy by importing the github repo
+
+    - Next, to set up a database, click Continue to Dashboard and select the Storage tab from your project dashboard. Select Connect Store → Create New → Postgres → Continue.
+        Connect (db to application)  , Once connected, navigate to the .env.local tab, click Show secret and Copy Snippet. Make sure you reveal the secrets before copying them.
+    - Navigate to your code editor and rename the .env.example file to .env. Paste in the copied contents from Vercel.
+        Important: Go to your .gitignore file and make sure .env is in the ignored files to prevent your database secrets from being exposed when you push to GitHub.
+        Finally, run npm i @vercel/postgres in your terminal to install the Vercel Postgres SDK.
+    - Seed the database
+        In the /scripts folder of your project, there's a file called seed.js. This script contains the instructions for creating and seeding the invoices, customers, user, revenue tables.
+        Next, in your package.json file, add the following line to your scripts:
+         /package.json:
+            "scripts": {
+                //...
+                "seed": "node -r dotenv/config ./scripts/seed.js"
+            },
+        This is the command that will execute seed.js.
+            run npm run seed. You should see some console.log messages in your terminal to let you know the script is running.
+    - Explore the database: 
+        on the sidenav of Versel
+
+Chap 7: FEtching Data
+    - API layer
+        In Next.js, you can create API endpoints using Route Handlers.
+    - Database queries
+        If you are using React Server Components (fetching data on the server), you can skip the API layer, and query your database directly without risking exposing your database secrets to the client.
+
+        Server Components support promises, providing a simpler solution for asynchronous tasks like data fetching. You can use async/await syntax without reaching out for useEffect, useState or data fetching libraries.
+        Server Components execute on the server, so you can keep expensive data fetches and logic on the server and only send the result to the client.
+        Since Server Components execute on the server, you can query the database directly without an additional API layer.
+
+        NB: The Vercel Postgres SDK provides protection against SQL injections.
+        /app/lib/data.ts
+        import { sql } from '@vercel/postgres';
+        //...
+
+    Promises:
+    In JavaScript, you can use the Promise.all() or Promise.allSettled() functions to initiate all promises at the same time.
+        export async function fetchCardData() {
+            try {
+                const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
+                const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
+                const invoiceStatusPromise = sql`SELECT
+                    SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS "paid",
+                    SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
+                    FROM invoices`;
+            
+                const data = await Promise.all([
+                    invoiceCountPromise,
+                    customerCountPromise,
+                    invoiceStatusPromise,
+                ]);
+                // ...
+            }
+        }
+    
+Chap 8: Static and Dynamic Rendering
+There are a couple of benefits of static rendering:
+
+Faster Websites - Prerendered content can be cached and globally distributed. This ensures that users around the world can access your website's content more quickly and reliably.
+    Reduced Server Load - Because the content is cached, your server does not have to dynamically generate content for each user request.
+    SEO - Prerendered content is easier for search engine crawlers to index, as the content is already available when the page loads. This can lead to improved search engine rankings.
+    Static rendering is useful for UI with no data or data that is shared across users, such as a static blog post or a product page. It might not be a good fit for a dashboard that has personalized data that is regularly updated.
+
+There are a couple of benefits of dynamic rendering:
+    Real-Time Data - Dynamic rendering allows your application to display real-time or frequently updated data. This is ideal for applications where data changes often.
+    User-Specific Content - It's easier to serve personalized content, such as dashboards or user profiles, and update the data based on user interaction.
+    Request Time Information - Dynamic rendering allows you to access information that can only be known at request time, such as cookies or the URL search parameters.
+
+You can use a Next.js API called unstable_noStore inside your Server Components or data fetching functions to opt out of static rendering.
+    Add noStore() here to prevent the response from being cached.
+    This is equivalent to in fetch(..., {cache: 'no-store'}).
+
+    /app/lib/data.ts:
+    import { unstable_noStore as noStore } from 'next/cache';
+    
+    export async function fetchRevenue() {
+        noStore();
+        // ...
+    }
+Note: unstable_noStore is an experimental API and may change in the future. If you prefer to use a stable API in your own projects, you can also use the Segment Config Option export const dynamic = "force-dynamic".
+
+Chap 9: Streaming
+Streaming works well with React's component model, as each component can be considered a chunk.
+
+There are two ways you implement streaming in Next.js:
+    At the page level, with the loading.tsx file.
+    For specific components, with <Suspense>.
+
+- Streaming a whole page with loading.tsx
+    In the /app/dashboard folder, create a new file called loading.tsx:
+    export default function Loading() {
+        return <div>Loading...</div>;
+    }
+
+loading.tsx is a special Next.js file built on top of Suspense, it allows you to create fallback UI to show as a replacement while page content loads.
+
+- Adding loading skeletons
+    Inside your loading.tsx file, import a new component called <DashboardSkeleton>:
+        import DashboardSkeleton from '@/app/ui/skeletons';
+        
+        export default function Loading() {
+        return <DashboardSkeleton />;
+        }
+
+Fixing the loading skeleton bug with route groups:
+    We can change this with Route Groups. Create a new folder called /(overview) inside the dashboard folder. Then, move your loading.tsx and page.tsx files inside the folder
+    When you create a new folder using parentheses (), the name won't be included in the URL path. So /dashboard/(overview)/page.tsx becomes /dashboard.
+
+Streaming a component:
+    Suspense allows you to defer rendering parts of your application until some condition is met (e.g. data is loaded).
+    You can wrap your dynamic components in Suspense. 
+    Then, pass it a fallback component to show while the dynamic component loads.
+
+    1. Delete all instances of fetchRevenue() and its data from /dashboard/(overview)/page.tsx. We move fetchRevenue() to revenue-chart Component.
+    2. Then, import <Suspense> from React, and wrap it around <RevenueChart />. You can pass it a fallback component called <RevenueChartSkeleton>.
+
+    /app/dashboard/(overview)/page.tsx:
+    //...
+    import { Suspense } from 'react';
+    import { RevenueChartSkeleton } from '@/app/ui/skeletons';
+    //...
+    <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4 lg:grid-cols-8">
+        <Suspense fallback={<RevenueChartSkeleton />}>
+          <RevenueChart />
+        </Suspense>
+        <LatestInvoices latestInvoices={latestInvoices} />
+    </div>
+    3. Finally, update the <RevenueChart> component to fetch its own data and remove the prop passed to it:
+    //...
+    import { fetchRevenue } from '@/app/lib/data';
+    //...
+    export default async function RevenueChart() { // Make component async, remove the props
+        const revenue = await fetchRevenue(); // Fetch data inside the component
+        //...
+
+    Where you place your suspense boundaries will vary depending on your application. In general, it's good practice to move your data fetches down to the components that need it, and then wrap those components in Suspense.
+    Q: In general, what is considered good practice when working with Suspense and data fetching?
+    A: Move data fetches down to the components that need it
+
+Chap 10: Partial Prerendering
+
+Chap 11: Adding Search and Pagination
+    use the Next.js APIs: searchParams, usePathname, and useRouter.
+    These are the Next.js client hooks that you'll use to implement the search functionality:
+        useSearchParams- Allows you to access the parameters of the current URL. For example, the search params for this URL /dashboard/invoices?page=1&query=pending would look like this: {page: '1', query: 'pending'}.
+        usePathname - Lets you read the current URL's pathname. For example, for the route /dashboard/invoices, usePathname would return '/dashboard/invoices'.
+        useRouter - Enables navigation between routes within client components programmatically. There are multiple methods you can use.
+    
+    Debouncing is a programming practice that limits the rate at which a function can fire. In our case, you only want to query the database when the user has stopped typing.
+    
+    How Debouncing Works:
+        Trigger Event: When an event that should be debounced (like a keystroke in the search box) occurs, a timer starts.
+        Wait: If a new event occurs before the timer expires, the timer is reset.
+        Execution: If the timer reaches the end of its countdown, the debounced function is executed.
+
+        - npm i use-debounce
+        - search.tsx:
+            import { useDebouncedCallback } from 'use-debounce';
+            const handleSearch = useDebouncedCallback((term) => {
+                //..
+            }, 300);
+
+    Add pagination
+        To summarize, in this chapter:
+
+        You've handled search and pagination with URL search parameters instead of client state.
+        You've fetched data on the server.
+        You're using the useRouter router hook for smoother, client-side transitions.
+
+Chap 12: Mutating Data
+    What are Server Actions?
+        React Server Actions allow you to run asynchronous code directly on the server. 
+        Server Actions achieve this through techniques like POST requests, encrypted closures, strict input checks, error message hashing, and host restrictions, all working together to significantly enhance your app's safety.
+        An advantage of invoking a Server Action within a Server Component is progressive enhancement - forms work even if JavaScript is disabled on the client.
+    Next.js with Server Actions
+        Server Actions are also deeply integrated with Next.js caching. When a form is submitted through a Server Action, not only can you use the action to mutate data, but you can also revalidate the associated cache using APIs like revalidatePath and revalidateTag.
+    
+    1. Create a new route and form
+    2. Create a Server Action
+        Great, now let's create a Server Action that is going to be called when the form is submitted.
+        Navigate to your lib directory and create a new file named actions.ts. At the top of this file, add the React use server directive:
+            /app/lib/actions.ts
+            'use server';
+        By adding the 'use server', you mark all the exported functions within the file as server functions. These server functions can then be imported into Client and Server components, making them extremely versatile.
+
+        Good to know: In HTML, you'd pass a URL to the action attribute. This URL would be the destination where your form data should be submitted (usually an API endpoint).
+        However, in React, the action attribute is considered a special prop - meaning React builds on top of it to allow actions to be invoked.
+        Behind the scenes, Server Actions create a POST API endpoint. This is why you don't need to create API endpoints manually when using Server Actions.
+    3. Extract the data from formData
+        /app/lib/actions.ts
+            'use server';
+ 
+                export async function createInvoice(formData: FormData) {
+                const rawFormData = {
+                    customerId: formData.get('customerId'),
+                    amount: formData.get('amount'),
+                    status: formData.get('status'),
+                };
+                // Test it out:
+                console.log(rawFormData);
+            }
+
+        Tip: If you're working with forms that have many fields, you may want to consider using the entries() method with JavaScript's Object.fromEntries(). 
+        For example: const rawFormData = Object.fromEntries(formData.entries())
+
+    4. Validate and prepare the data
+        To handle type validation, you have a few options. While you can manually validate types, using a type validation library can save you time and effort. For your example, we'll use Zod, a TypeScript-first validation library that can simplify this task for you.
+        In your actions.ts file, import Zod and define a schema that matches the shape of your form object. This schema will validate the formData before saving it to a database.
+
+    5. Inserting the data into your database
+       import { z } from 'zod';
+        import { sql } from '@vercel/postgres';
+        
+        // ...
+        
+        export async function createInvoice(formData: FormData) {
+            const { customerId, amount, status } = CreateInvoice.parse({
+                customerId: formData.get('customerId'),
+                amount: formData.get('amount'),
+                status: formData.get('status'),
+            });
+            const amountInCents = amount * 100;
+            const date = new Date().toISOString().split('T')[0];
+            
+            await sql`
+                INSERT INTO invoices (customer_id, amount, status, date)
+                VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
+            `;
+        }
+
+    6. Revalidate and redirect
+          Next.js has a Client-side Router Cache that stores the route segments in the user's browser for a time.
+          import { revalidatePath } from 'next/cache';
+          import { redirect } from 'next/navigation';
+          //...
+          export ...
+            revalidatePath('/dashboard/invoices');
+            redirect('/dashboard/invoices');
+          } 
+        
+        Update 
+            These are the steps you'll take to update an invoice:
+                Create a new dynamic route segment with the invoice id.
+                Read the invoice id from the page params.
+                Fetch the specific invoice from your database.
+                Pre-populate the form with the invoice data.
+                Update the invoice data in your database.
+            
+            dynamic route Segment with the invoice id:
+                Next.js allows you to create Dynamic Route Segments when you don't know the exact segment name and want to create routes based on data. This could be blog post titles, product pages, etc. You can create dynamic route segments by wrapping a folder's name in square brackets. For example, [id], [post] or [slug].
+                In your /invoices folder, create a new dynamic route called [id], then a new route called edit with a page.tsx file.
+
+Chap 13: Handling Errors
+      - use try/catch
+      - use error.tsx
+         Inside your /dashboard/invoices folder, create a new file called error.tsx
+      - notFound
+         When you know the invoice doesn't exist in your database, let's use notFound to handle it.
+
+         Navigate to /dashboard/invoices/[id]/edit/page.tsx, and import { notFound } from 'next/navigation'.
+         Create a not-found.tsx file inside the /edit folder.
+
+    Which file in Next.js serves as a catch-all for unexpected errors in your route segments?
+    C error.tsx
+
+Chap 14: Improving Accessibility
+    implement server-side validation with Server Actions, and how you can show form errors using the useFormState hook.
+    - lint:
+        Add next lint as a script in your package.json file:  "lint": "next lint"
+        run npm run lint
+    - Improving form accessibility
+        There are three things we're already doing to improve accessibility in our forms:
+            Semantic HTML: Using semantic elements (<input>, <option>, etc) instead of <div>. This allows assistive technologies (AT) to focus on the input elements and provide appropriate contextual information to the user, making the form easier to navigate and understand.
+            Labelling: Including <label> and the htmlFor attribute ensures that each form field has a descriptive text label. This improves AT support by providing context and also enhances usability by allowing users to click on the label to focus on the corresponding input field.
+            Focus Outline: The fields are properly styled to show an outline when they are in focus. This is critical for accessibility as it visually indicates the active element on the page, helping both keyboard and screen reader users to understand where they are on the form. You can verify this by pressing tab.   
+    - Form validation
+        Client-Side validation: required ...
+        Server-Side validation

@@ -1,0 +1,14 @@
+- escalidraw.com
+- mailtrap
+- vercel
+- mongo mongoose nodemail
+npx create-next-app@latest .
+npm i axios bcryptjs jsonwebtoken nodemailer react-hot-toast mongoose
+
+inside src: >models, helpers folders,.env, dbConfig/dbConfig.ts
+FRONTEND inside app: login/page.tsx, sigup/page.tsx  These are components routes
+BACKEND inside app: api/users/signup/route.ts  These are api routes
+edit .env for connexion -  Contains constants
+edit dbConfig.ts for connexion to db - use try and catch
+
+
